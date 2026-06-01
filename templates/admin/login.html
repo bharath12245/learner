@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center py-5">
+        <div class="col-md-5">
+            <div class="glass p-5 animate-up">
+                <div class="text-center mb-5">
+                    <i class="fas fa-user-shield fa-4x text-primary mb-4"></i>
+                    <h2 class="fw-bold">Admin <span class="text-primary">Login</span></h2>
+                    <p class="text-secondary">Secure access for system administrators.</p>
+                </div>
+                <form action="{{ url_for('admin_login') }}" method="POST">
+                    <div class="mb-4">
+                        <label class="form-label text-secondary">Admin Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0 text-secondary"><i class="fas fa-envelope"></i></span>
+                            <input type="email" name="email" class="form-control border-start-0" placeholder="admin@career.com" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-secondary">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0 text-secondary"><i class="fas fa-lock"></i></span>
+                            <input type="password" name="password" class="form-control border-start-0" placeholder="••••••••" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary-custom w-100 py-3 mt-3">Login to Dashboard</button>
+                </form>
+                <div class="text-center mt-4">
+                    <p class="small text-secondary">Default: admin / admin123</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Career Recommendation System</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Sidebar (for Admin/Dashboard) -->
+    {% if session.get('admin_logged_in') %}
+    <div class="sidebar">
+        <div class="mb-5 text-center">
+            <h3 class="fw-bold"><span style="color: var(--primary);">CAREER</span> AI</h3>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_dashboard' }}">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="{{ url_for('manage_users') }}" class="nav-link {{ 'active' if request.endpoint == 'manage_users' }}">
+                <i class="fas fa-users"></i> Users
+            </a>
+            <a href="{{ url_for('manage_careers') }}" class="nav-link {{ 'active' if request.endpoint == 'manage_careers' }}">
+                <i class="fas fa-briefcase"></i> Careers
+            </a>
+            <a href="{{ url_for('logout') }}" class="nav-link mt-5 text-danger">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </nav>
+    </div>
+    {% endif %}
+
+    <div class="{{ 'main-content' if session.get('admin_logged_in') else '' }}">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+            <div class="container">
+                <a class="navbar-brand fw-bold fs-3" href="{{ url_for('index') }}">
+                    <i class="fas fa-graduation-cap text-primary me-2"></i>SMART<span class="text-primary">CAREER</span>
+                </a>
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        <li class="nav-item"><a class="nav-link mx-2" href="{{ url_for('index') }}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link mx-2" href="{{ url_for('search') }}">Search</a></li>
+                        {% if session.get('user_name') %}
+                        <li class="nav-item"><a class="nav-link mx-2 text-primary fw-bold" href="{{ url_for('results') }}">Hi, {{ session['user_name'] }}</a></li>
+                        <li class="nav-item"><a class="btn btn-outline-danger btn-sm ms-3" href="{{ url_for('logout') }}">Logout</a></li>
+                        {% elif not session.get('admin_logged_in') %}
+                        <li class="nav-item"><a class="nav-link mx-2" href="{{ url_for('login') }}">Login</a></li>
+                        <li class="nav-item"><a class="nav-link mx-2" href="{{ url_for('admin_login') }}">Admin</a></li>
+                        <li class="nav-item"><a class="btn btn-primary-custom btn-sm ms-3" href="{{ url_for('register') }}">Get Started</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Flash Messages -->
+        <div class="container mt-3">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} glass border-0 text-white alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Content -->
+        {% block content %}{% endblock %}
+
+        <!-- Footer -->
+        <footer class="mt-5 py-4 border-top border-secondary text-center" style="background: rgba(0,0,0,0.2);">
+            <div class="container">
+                <p class="mb-0 text-secondary">&copy; {{ now.year }} Smart Career Recommendation System. All Rights Reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Sidebar Toggle for Mobile
+        document.querySelector('.navbar-toggler').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            if(sidebar) sidebar.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

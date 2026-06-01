@@ -1,0 +1,137 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="glass p-5 animate-up">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold">Create Your <span class="text-primary">Profile</span></h2>
+                    <p class="text-secondary">Enter your details to get personalized career recommendations.</p>
+                </div>
+                <form action="{{ url_for('register') }}" method="POST">
+                    <div class="mb-4">
+                        <label class="form-label text-secondary">Full Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="John Doe" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-secondary">Email Address</label>
+                        <input type="email" name="email" class="form-control" placeholder="john@example.com" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-secondary">Password</label>
+                        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-secondary">Skills</label>
+                        <div class="tag-input-container form-control d-flex flex-wrap align-items-center gap-2" id="tagInputContainer" style="min-height: 52px; cursor: text;">
+                            <input type="text" id="skillsSearchInput" placeholder="Type a skill & press Enter..." style="border: none; background: transparent; color: white; outline: none; flex-grow: 1; min-width: 150px; font-size: 0.9rem;">
+                        </div>
+                        <input type="hidden" name="skills" id="hiddenSkillsInput" required>
+                        
+                        <!-- Skill Suggestions -->
+                        <div class="mt-3">
+                            <label class="form-label text-secondary small" style="font-size: 0.75rem;">Suggestions (Click to add):</label>
+                            <div class="d-flex flex-wrap gap-2 mt-1">
+                                <span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25 suggestion-badge" style="cursor: pointer; transition: all 0.2s;" data-skill="Python">Python</span>
+                                <span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25 suggestion-badge" style="cursor: pointer; transition: all 0.2s;" data-skill="Machine Learning">Machine Learning</span>
+                                <span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25 suggestion-badge" style="cursor: pointer; transition: all 0.2s;" data-skill="JavaScript">JavaScript</span>
+                                <span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25 suggestion-badge" style="cursor: pointer; transition: all 0.2s;" data-skill="React">React</span>
+                                <span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25 suggestion-badge" style="cursor: pointer; transition: all 0.2s;" data-skill="SQL">SQL</span>
+                                <span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25 suggestion-badge" style="cursor: pointer; transition: all 0.2s;" data-skill="Figma">Figma</span>
+                                <span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25 suggestion-badge" style="cursor: pointer; transition: all 0.2s;" data-skill="Docker">Docker</span>
+                                <span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25 suggestion-badge" style="cursor: pointer; transition: all 0.2s;" data-skill="Java">Java</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-secondary">Interests</label>
+                        <input type="text" name="interests" class="form-control" placeholder="AI, Web Development, Design..." required>
+                    </div>
+                    <button type="submit" class="btn btn-primary-custom w-100 py-3 mt-3">Get Recommendations</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tagInputContainer = document.getElementById('tagInputContainer');
+    const skillsSearchInput = document.getElementById('skillsSearchInput');
+    const hiddenSkillsInput = document.getElementById('hiddenSkillsInput');
+    const suggestionBadges = document.querySelectorAll('.suggestion-badge');
+    
+    let tags = [];
+    
+    function updateTagsInput() {
+        // Clear existing tags
+        const existingTags = tagInputContainer.querySelectorAll('.tag-badge');
+        existingTags.forEach(el => el.remove());
+        
+        // Render tags
+        tags.forEach(tag => {
+            const tagEl = document.createElement('span');
+            tagEl.className = 'tag-badge animate-up';
+            tagEl.innerHTML = `${tag} <span class="remove-tag" data-tag="${tag}">&times;</span>`;
+            tagInputContainer.insertBefore(tagEl, skillsSearchInput);
+        });
+        
+        // Update hidden input
+        hiddenSkillsInput.value = tags.join(',');
+    }
+    
+    function addTag(value) {
+        const cleanValue = value.trim();
+        if (!cleanValue) return;
+        
+        if (!tags.includes(cleanValue)) {
+            tags.push(cleanValue);
+            updateTagsInput();
+        }
+        skillsSearchInput.value = '';
+    }
+    
+    function removeTag(value) {
+        tags = tags.filter(t => t !== value);
+        updateTagsInput();
+    }
+    
+    // Add tag on enter key
+    skillsSearchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addTag(this.value);
+        }
+    });
+    
+    // Add tag on comma typed
+    skillsSearchInput.addEventListener('input', function(e) {
+        if (this.value.endsWith(',')) {
+            addTag(this.value.slice(0, -1));
+        }
+    });
+    
+    // Focus inner input on container click
+    tagInputContainer.addEventListener('click', function(e) {
+        if (e.target === tagInputContainer) {
+            skillsSearchInput.focus();
+        }
+    });
+    
+    // Handle tag close click
+    tagInputContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-tag')) {
+            removeTag(e.target.dataset.tag);
+        }
+    });
+    
+    // Click suggestion to add tag
+    suggestionBadges.forEach(badge => {
+        badge.addEventListener('click', function() {
+            addTag(this.dataset.skill);
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center py-5">
+        <div class="col-md-5">
+            <div class="glass p-5 animate-up">
+                <div class="text-center mb-5">
+                    <i class="fas fa-sign-in-alt fa-4x text-primary mb-4"></i>
+                    <h2 class="fw-bold">User <span class="text-primary">Login</span></h2>
+                    <p class="text-secondary">Sign in to access your career matches and AI roadmaps.</p>
+                </div>
+                <form action="{{ url_for('login') }}" method="POST">
+                    <div class="mb-4">
+                        <label class="form-label text-secondary">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0 text-secondary"><i class="fas fa-envelope"></i></span>
+                            <input type="email" name="email" class="form-control border-start-0" placeholder="john@example.com" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-secondary">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0 text-secondary"><i class="fas fa-lock"></i></span>
+                            <input type="password" name="password" class="form-control border-start-0" placeholder="••••••••" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary-custom w-100 py-3 mt-3">Sign In</button>
+                </form>
+                <div class="text-center mt-4">
+                    <p class="small text-secondary">Don't have an account? <a href="{{ url_for('register') }}" class="text-primary fw-bold text-decoration-none">Register here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

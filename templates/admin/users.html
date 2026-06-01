@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-5 animate-up">
+        <div>
+            <h1 class="fw-bold mb-0">User <span class="text-primary">Management</span></h1>
+            <p class="text-secondary">View and manage registered users and their profiles.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('export_users') }}" class="btn btn-outline-success rounded-pill px-4">
+                <i class="fas fa-file-export me-2"></i> Export CSV
+            </a>
+            <input type="text" id="userSearch" class="form-control rounded-pill px-4" placeholder="Search users...">
+        </div>
+    </div>
+
+    <div class="glass animate-up">
+        <div class="table-responsive">
+            <table class="table table-custom mb-0" id="userTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Skills</th>
+                        <th>Interests</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>#{{ user.id }}</td>
+                        <td class="fw-bold">{{ user.name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for skill in user.skills.split(',')[:2] %}
+                                <span class="badge bg-info bg-opacity-10 text-info small p-1 px-2 rounded-pill">{{ skill.strip() }}</span>
+                                {% endfor %}
+                                {% if user.skills.split(',')|length > 2 %}
+                                <span class="text-secondary small">+{{ user.skills.split(',')|length - 2 }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="text-secondary small">{{ user.interests }}</td>
+                        <td class="small">{{ user.created_at }}</td>
+                        <td>
+                            <a href="{{ url_for('delete_user', user_id=user.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this user? All recommendations will be lost.')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-secondary">No users found in the system.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('userSearch').addEventListener('keyup', function() {
+        let value = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#userTable tbody tr');
+        rows.forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-5 animate-up">
+        <div>
+            <h1 class="fw-bold mb-0">Manage <span class="text-primary">Careers</span></h1>
+            <p class="text-secondary">Add, edit, or remove career paths from the database.</p>
+        </div>
+        <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addCareerModal">
+            <i class="fas fa-plus me-2"></i> Add New Career
+        </button>
+    </div>
+
+    <div class="glass animate-up">
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Career Name</th>
+                        <th>Required Skills</th>
+                        <th>Salary</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for career in careers %}
+                    <tr>
+                        <td>#{{ career.career_id }}</td>
+                        <td class="fw-bold">{{ career.career_name }}</td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for skill in career.required_skills.split(',')[:3] %}
+                                <span class="badge bg-primary bg-opacity-10 text-primary small p-1 px-2 rounded-pill">{{ skill.strip() }}</span>
+                                {% endfor %}
+                                {% if career.required_skills.split(',')|length > 3 %}
+                                <span class="text-secondary small">...</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>{{ career.salary }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#editModal{{ career.career_id }}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <a href="{{ url_for('delete_career', career_id=career.career_id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- Edit Modal -->
+                    <div class="modal fade" id="editModal{{ career.career_id }}" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content glass border-primary">
+                                <div class="modal-header border-0">
+                                    <h5 class="modal-title fw-bold">Edit <span class="text-primary">Career</span></h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form action="{{ url_for('edit_career', career_id=career.career_id) }}" method="POST">
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label small text-secondary">Career Name</label>
+                                                <input type="text" name="career_name" class="form-control" value="{{ career.career_name }}" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label small text-secondary">Salary Range</label>
+                                                <input type="text" name="salary" class="form-control" value="{{ career.salary }}">
+                                            </div>
+                                            <div class="col-12 mb-3">
+                                                <label class="form-label small text-secondary">Required Skills (Comma separated)</label>
+                                                <textarea name="required_skills" class="form-control" rows="2" required>{{ career.required_skills }}</textarea>
+                                            </div>
+                                            <div class="col-12 mb-3">
+                                                <label class="form-label small text-secondary">Future Scope</label>
+                                                <textarea name="future_scope" class="form-control" rows="2">{{ career.future_scope }}</textarea>
+                                            </div>
+                                            <div class="col-12 mb-3">
+                                                <label class="form-label small text-secondary">Companies Hiring</label>
+                                                <input type="text" name="companies_hiring" class="form-control" value="{{ career.companies_hiring }}">
+                                            </div>
+                                            <div class="col-12 mb-3">
+                                                <label class="form-label small text-secondary">Description</label>
+                                                <textarea name="description" class="form-control" rows="3">{{ career.description }}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-0">
+                                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary-custom px-4">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addCareerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content glass border-primary">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Add New <span class="text-primary">Career</span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('add_career') }}" method="POST">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small text-secondary">Career Name</label>
+                            <input type="text" name="career_name" class="form-control" placeholder="e.g. AI Engineer" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small text-secondary">Salary Range</label>
+                            <input type="text" name="salary" class="form-control" placeholder="e.g. $100k - $150k">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label small text-secondary">Required Skills (Comma separated)</label>
+                            <textarea name="required_skills" class="form-control" rows="2" placeholder="Python, SQL, ML..." required></textarea>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label small text-secondary">Future Scope</label>
+                            <textarea name="future_scope" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label small text-secondary">Companies Hiring</label>
+                            <input type="text" name="companies_hiring" class="form-control" placeholder="Google, Amazon...">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label small text-secondary">Description</label>
+                            <textarea name="description" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary-custom px-4">Add Career</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

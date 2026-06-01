@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5 animate-up">
+        <h1 class="fw-bold">Your Career <span class="text-primary">Matches</span></h1>
+        <p class="text-secondary">Based on your profile, here are the top 3 career paths for you.</p>
+    </div>
+
+    <div class="row g-4">
+        {% for res in recommendations %}
+        <div class="col-md-4 animate-up" style="animation-delay: {{ loop.index0 * 0.2 }}s;">
+            <div class="career-card glass d-flex flex-column h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold mb-0">{{ res.career_name }}</h4>
+                    <div class="percentage-circle" style="--percent: {{ res.match_percentage }};">
+                        <span>{{ res.match_percentage|int }}%</span>
+                    </div>
+                </div>
+                
+                <p class="text-secondary flex-grow-1">{{ res.description }}</p>
+
+                <div class="mb-3 p-3 rounded-3" style="background: rgba(255,255,255,0.03); border: 1px dashed var(--glass-border);">
+                    <h6 class="text-info fw-bold small mb-1"><i class="fas fa-magic me-1"></i> AI Insight</h6>
+                    <p class="small text-secondary mb-0" style="font-style: italic;">{{ res.ai_reason }}</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h6 class="text-primary fw-bold small text-uppercase">Missing Skills</h6>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        {% if res.missing_skills %}
+                            {% for skill in res.missing_skills %}
+                                <span class="badge-missing">{{ skill }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="badge-skill">Perfect Match!</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between text-secondary small mb-3">
+                        <span><i class="fas fa-coins me-1"></i> {{ res.salary }}</span>
+                        <span><i class="fas fa-chart-line me-1"></i> High Growth</span>
+                    </div>
+                    <a href="{{ url_for('career_detail', career_id=res.career_id) }}" class="btn btn-outline-primary btn-sm w-100 rounded-pill">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Skill Gap Analysis Section -->
+    <div class="mt-5 glass p-5 animate-up">
+        <h3 class="fw-bold mb-4">Detailed <span class="text-primary">Skill Gap Analysis</span></h3>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <h5 class="text-secondary mb-3">Existing Skills</h5>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for skill in session.get('user_skills', []) %}
+                        <span class="badge-skill">{{ skill }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <h5 class="text-secondary mb-3">Suggested Learning Path</h5>
+                <p class="small text-secondary">Focus on these missing skills to increase your match percentage for <strong>{{ recommendations[0].career_name }}</strong>:</p>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for skill in recommendations[0].missing_skills %}
+                        <span class="badge-missing">{{ skill }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

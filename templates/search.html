@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5 animate-up">
+        <h1 class="fw-bold">Explore <span class="text-primary">Careers</span></h1>
+        <p class="text-secondary">Search our database or browse by category.</p>
+    </div>
+
+    <div class="row justify-content-center mb-5 animate-up">
+        <div class="col-md-8">
+            <form action="{{ url_for('search') }}" method="GET" class="d-flex gap-2">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 text-secondary">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" name="q" class="form-control border-start-0" placeholder="Search by name or skill..." value="{{ query }}">
+                </div>
+                <button type="submit" class="btn btn-primary-custom px-4">Search</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mb-5 animate-up">
+        <div class="col-12">
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+                <a href="{{ url_for('search', q='AI') }}" class="btn btn-outline-primary rounded-pill btn-sm">AI Careers</a>
+                <a href="{{ url_for('search', q='Web') }}" class="btn btn-outline-primary rounded-pill btn-sm">Web Development</a>
+                <a href="{{ url_for('search', q='Data') }}" class="btn btn-outline-primary rounded-pill btn-sm">Data Science</a>
+                <a href="{{ url_for('search', q='Security') }}" class="btn btn-outline-primary rounded-pill btn-sm">Cybersecurity</a>
+                <a href="{{ url_for('search', q='Cloud') }}" class="btn btn-outline-primary rounded-pill btn-sm">Cloud Computing</a>
+                <a href="{{ url_for('search', q='Mobile') }}" class="btn btn-outline-primary rounded-pill btn-sm">Mobile App Dev</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for career in careers %}
+        <div class="col-md-4 animate-up">
+            <div class="career-card glass h-100 d-flex flex-column">
+                <h4 class="fw-bold mb-3">{{ career.career_name }}</h4>
+                <p class="text-secondary small flex-grow-1">{{ career.description }}</p>
+                <div class="mb-3">
+                    {% for skill in career.required_skills.split(',')[:3] %}
+                        <span class="badge-skill" style="font-size: 0.7rem;">{{ skill.strip() }}</span>
+                    {% endfor %}
+                </div>
+                <a href="{{ url_for('career_detail', career_id=career.career_id) }}" class="btn btn-outline-light btn-sm w-100 rounded-pill mt-auto">Details</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-search fa-4x text-secondary opacity-25 mb-4"></i>
+            <h3>No careers found matching "{{ query }}"</h3>
+            <p class="text-secondary">Try different keywords or browse our categories.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

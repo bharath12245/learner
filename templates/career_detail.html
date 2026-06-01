@@ -1,0 +1,379 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto animate-up">
+            <div class="glass p-5">
+                <div class="d-flex align-items-center mb-5">
+                    <div class="bg-primary bg-opacity-10 p-4 rounded-circle me-4">
+                        <i class="fas fa-briefcase fa-3x text-primary"></i>
+                    </div>
+                    <div>
+                        <h1 class="fw-bold mb-0">{{ career.career_name }}</h1>
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 mt-2">Recommended Career</span>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-5">
+                    <div class="col-md-4">
+                        <div class="p-3 border border-secondary rounded-4 text-center">
+                            <h6 class="text-secondary small text-uppercase">Salary Range</h6>
+                            <h5 class="fw-bold text-primary">{{ career.salary }}</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border border-secondary rounded-4 text-center">
+                            <h6 class="text-secondary small text-uppercase">Job Market</h6>
+                            <h5 class="fw-bold text-info">Very High</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border border-secondary rounded-4 text-center">
+                            <h6 class="text-secondary small text-uppercase">Future Scope</h6>
+                            <h5 class="fw-bold text-warning">Exponential</h5>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <h4 class="fw-bold mb-3">About this Career</h4>
+                    <p class="text-secondary">{{ career.description }}</p>
+                </div>
+
+                <div class="mb-5">
+                    <h4 class="fw-bold mb-3">Required Skills</h4>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for skill in career.required_skills.split(',') %}
+                            <span class="badge-skill">{{ skill.strip() }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <h4 class="fw-bold mb-3">Future Scope & Impact</h4>
+                    <p class="text-secondary">{{ career.future_scope }}</p>
+                </div>
+
+                <div class="mb-5">
+                    <h4 class="fw-bold mb-3">Top Companies Hiring</h4>
+                    <div class="row row-cols-2 row-cols-md-4 g-3 mt-2">
+                        {% for company in career.companies_hiring.split(',') %}
+                        <div class="col">
+                            <div class="glass p-2 text-center small fw-bold text-primary border-primary border-opacity-25">
+                                {{ company.strip() }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- AI Roadmap Section -->
+                <div class="mt-5 pt-5 border-top border-secondary border-opacity-25">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <div>
+                            <h4 class="fw-bold mb-0"><i class="fas fa-user-tie text-primary me-2"></i> Professional Career Roadmap</h4>
+                            <p class="text-secondary small mb-0 mt-1">Get custom learning steps, real projects to build, and recommended learning resources.</p>
+                        </div>
+                        <button id="generateRoadmap" class="btn btn-primary-custom btn-sm">
+                            <i class="fas fa-magic me-2"></i>Generate Roadmap
+                        </button>
+                    </div>
+                    <div id="roadmapContent" class="text-secondary small">
+                        <!-- Content generated dynamically -->
+                        <div class="glass p-4 text-center">
+                            <p class="mb-0 text-secondary">Click the button above to have your mentor prepare a personalized learning path based on your profile.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="{{ url_for('results') }}" class="btn btn-outline-light rounded-pill px-5">Back to Recommendations</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Chatbot Toggle Button -->
+<div class="chat-toggle-btn shadow" id="chatToggleBtn">
+    <i class="fas fa-comments"></i>
+</div>
+
+<!-- Floating Chatbot Widget -->
+<div class="chat-widget minimized glass shadow-lg" id="chatWidget">
+    <div class="chat-header">
+        <div class="d-flex align-items-center gap-2">
+            <div class="bg-primary bg-opacity-10 p-1.5 rounded-circle" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-user-ninja text-primary"></i>
+            </div>
+            <div>
+                <h6 class="fw-bold mb-0 text-white" style="font-size: 0.88rem;">AI Career Mentor</h6>
+                <span class="text-success small" style="font-size: 0.65rem; display: flex; align-items: center; gap: 4px;">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #2ecc71; display: inline-block;"></span> Online
+                </span>
+            </div>
+        </div>
+        <button class="btn btn-sm btn-link text-secondary p-0 text-decoration-none" id="chatCloseBtn" style="font-size: 1.2rem;">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="chat-body" id="chatBody">
+        <div class="chat-message mentor shadow-sm">
+            Hi! I am your AI Career Mentor. Ask me any questions about preparing for a career as a <strong>{{ career.career_name }}</strong>! E.g. "What projects should I build?" or "What are the job prospects?"
+        </div>
+    </div>
+    <div class="chat-footer">
+        <input type="text" class="chat-input" id="chatInput" placeholder="Ask your mentor...">
+        <button class="chat-send-btn" id="chatSendBtn">
+            <i class="fas fa-paper-plane" style="font-size: 0.85rem;"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+// Roadmap Generation and Progress Checklist script
+document.getElementById('generateRoadmap').addEventListener('click', function() {
+    const btn = this;
+    const content = document.getElementById('roadmapContent');
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Preparing Path...';
+    content.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-grow text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+            <h5 class="fw-bold text-white">Consulting Mentor AI...</h5>
+            <p class="text-secondary small">Customizing learning modules and crafting portfolio projects for you.</p>
+        </div>
+    `;
+
+    fetch('/generate_roadmap/{{ career.career_id }}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                content.innerHTML = `<div class="alert alert-danger glass text-white border-0">${data.error}</div>`;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-magic me-2"></i>Try Again';
+            } else {
+                // Construct mentor banner intro
+                let html = `
+                    <div class="mentor-banner animate-up">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="bg-primary bg-opacity-10 p-2 rounded-circle">
+                                <i class="fas fa-user-ninja text-primary fs-4"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold text-white mb-1">AI Career Mentor Intro</h6>
+                                <p class="text-secondary mb-2 small" style="line-height: 1.5;">"${data.mentor_intro}"</p>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-primary bg-opacity-15 text-primary small">Timeline: ${data.timeline_duration}</span>
+                                    <span class="text-secondary small" style="font-size: 0.75rem;">Structured Program</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Job Readiness Progress Tracker -->
+                    <div class="glass p-4 progress-tracker-card mb-4 animate-up" id="progressCard">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold mb-0 text-white"><i class="fas fa-tasks text-primary me-2"></i>Job Readiness Progress</h6>
+                            <span class="text-primary fw-bold" id="progressPercent">0% Complete</span>
+                        </div>
+                        <div class="progress" style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;">
+                            <div class="progress-bar" id="progressBar" style="width: 0%; background: linear-gradient(90deg, var(--neon-blue), var(--secondary)); transition: width 0.4s ease;" role="progressbar"></div>
+                        </div>
+                        <p class="small text-secondary mb-0 mt-2" style="font-size: 0.75rem;">Check off topics as you master them to level up your career readiness score.</p>
+                    </div>
+                    
+                    <div class="roadmap-container">
+                `;
+                
+                // Add timeline steps with checkboxes
+                data.steps.forEach((step, idx) => {
+                    html += `
+                        <div class="roadmap-step animate-up" data-step="${step.step_number}" style="animation-delay: ${(idx + 1) * 0.15}s;">
+                            <div class="roadmap-card">
+                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                    <h5 class="fw-bold mb-0 text-white" style="letter-spacing: -0.3px;">${step.title}</h5>
+                                    <span class="roadmap-duration"><i class="far fa-calendar-alt me-1"></i> ${step.duration}</span>
+                                </div>
+                                
+                                <p class="text-secondary small mb-3" style="line-height: 1.5;">
+                                    <strong>Focus Area:</strong> ${step.focus}
+                                </p>
+                                
+                                <div class="roadmap-topics-title"><i class="fas fa-graduation-cap text-secondary me-2"></i>Topics to Master</div>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    ${step.topics.map((t, tIdx) => {
+                                        const checkboxKey = `roadmap_{{ career.career_id }}_step_${step.step_number}_topic_${tIdx}`;
+                                        return `
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="roadmap-checkbox" data-key="${checkboxKey}">
+                                                <div class="checkbox-trigger"></div>
+                                                <span>${t}</span>
+                                            </label>
+                                        `;
+                                    }).join('')}
+                                </div>
+                                
+                                <div class="roadmap-project-box">
+                                    <div class="roadmap-project-title text-primary small mb-2">
+                                        <i class="fas fa-cubes me-1"></i> Portfolio Builder: ${step.project.title}
+                                    </div>
+                                    <p class="text-secondary small mb-0" style="line-height: 1.4; font-size: 0.82rem;">
+                                        ${step.project.description}
+                                    </p>
+                                </div>
+                                
+                                <div class="roadmap-resources-title"><i class="fas fa-book-open text-info me-2"></i>Curated Learning Resources</div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    ${step.resources.map(r => `
+                                        <span class="roadmap-resource-item">
+                                            <i class="fas fa-compass text-info"></i> ${r}
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                    </div>
+                    
+                    <div class="glass p-4 border-start border-4 border-success mt-4 animate-up" style="animation-delay: ${(data.steps.length + 1) * 0.15}s;">
+                        <h6 class="fw-bold text-success mb-2"><i class="fas fa-lightbulb me-2"></i>Mentor Advice for Success</h6>
+                        <p class="text-secondary mb-0 small" style="font-style: italic; line-height: 1.5;">
+                            "${data.mentor_advice}"
+                        </p>
+                    </div>
+                `;
+                
+                content.innerHTML = html;
+                btn.style.display = 'none';
+                
+                // Initialize progress checklist logic
+                restoreProgress();
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            content.innerHTML = `
+                <div class="alert alert-danger glass text-white border-0 text-center py-4">
+                    <i class="fas fa-exclamation-triangle fa-2x text-danger mb-3"></i>
+                    <h5>Roadmap Generation Failed</h5>
+                    <p class="small text-secondary mb-0">Something went wrong. Please check your connection and try again.</p>
+                </div>
+            `;
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-magic me-2"></i>Try Again';
+        });
+});
+
+// Checklist State and Calculation Logic
+function updateProgress() {
+    const checkboxes = document.querySelectorAll('.roadmap-checkbox');
+    const total = checkboxes.length;
+    if (total === 0) return;
+    
+    let checked = 0;
+    checkboxes.forEach(cb => {
+        if (cb.checked) checked++;
+    });
+    
+    const percent = Math.round((checked / total) * 100);
+    document.getElementById('progressPercent').innerText = `${percent}% Complete`;
+    document.getElementById('progressBar').style.width = `${percent}%`;
+}
+
+// Event listener for checkbox ticks
+document.getElementById('roadmapContent').addEventListener('change', function(e) {
+    if (e.target.classList.contains('roadmap-checkbox')) {
+        localStorage.setItem(e.target.dataset.key, e.target.checked);
+        updateProgress();
+    }
+});
+
+// Load state from local storage on render
+function restoreProgress() {
+    const checkboxes = document.querySelectorAll('.roadmap-checkbox');
+    checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.dataset.key);
+        if (saved === 'true') {
+            cb.checked = true;
+        }
+    });
+    updateProgress();
+}
+
+// Floating Chatbot JS Controller
+const chatToggleBtn = document.getElementById('chatToggleBtn');
+const chatWidget = document.getElementById('chatWidget');
+const chatCloseBtn = document.getElementById('chatCloseBtn');
+const chatInput = document.getElementById('chatInput');
+const chatSendBtn = document.getElementById('chatSendBtn');
+const chatBody = document.getElementById('chatBody');
+
+chatToggleBtn.addEventListener('click', () => {
+    chatWidget.classList.toggle('minimized');
+    if (!chatWidget.classList.contains('minimized')) {
+        chatInput.focus();
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+});
+
+chatCloseBtn.addEventListener('click', () => {
+    chatWidget.classList.add('minimized');
+});
+
+function addMessage(text, sender) {
+    const msg = document.createElement('div');
+    msg.className = `chat-message ${sender} shadow-sm`;
+    msg.innerHTML = text;
+    chatBody.appendChild(msg);
+    chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function sendChatMessage() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    addMessage(text, 'user');
+    chatInput.value = '';
+
+    // Show typing indicator
+    const indicator = document.createElement('div');
+    indicator.className = 'typing-indicator';
+    indicator.id = 'typingIndicator';
+    indicator.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+    chatBody.appendChild(indicator);
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    fetch('/mentor_chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            message: text,
+            career_name: '{{ career.career_name }}'
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const typing = document.getElementById('typingIndicator');
+        if (typing) typing.remove();
+        addMessage(data.response, 'mentor');
+    })
+    .catch(err => {
+        console.error(err);
+        const typing = document.getElementById('typingIndicator');
+        if (typing) typing.remove();
+        addMessage("I'm having trouble connecting right now. Please try again in a moment!", 'mentor');
+    });
+}
+
+chatSendBtn.addEventListener('click', sendChatMessage);
+chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendChatMessage();
+});
+</script>
+{% endblock %}
