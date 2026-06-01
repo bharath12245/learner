@@ -4,3 +4,5 @@ __pycache__/
 career_system.db
 scratch/
 .gemini/
+venv/
+.venv/
